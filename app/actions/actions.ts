@@ -1,20 +1,22 @@
 "use server";
 
 import { createClient } from "@libsql/client/web";
+import { cache } from "react";
 
 const db = createClient({
   url: process.env.TURSO_DATABASE_URL!,
   authToken: process.env.TURSO_AUTH_TOKEN,
 });
 
-export async function getUsers() {
+
+export const getUsers = cache(async () => {
   try {
     const result = await db.execute("SELECT * FROM users");
     return { success: true, rows: result.rows };
   } catch (error: any) {
     return { success: false, error: error.message };
   }
-}
+});
 
 export async function registerUser(username: string, ipAddress: string) {
   try {
