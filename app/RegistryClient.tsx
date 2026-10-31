@@ -54,7 +54,7 @@ export default function RegistryClient({ initialUsers }: { initialUsers: UserRec
 
   const handleClearDb = async () => {
     setStatus(null);
-
+    
     const res = await clearDatabase();
     if (res.success) {
       setUsers([]);
