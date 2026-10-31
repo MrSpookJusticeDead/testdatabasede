@@ -227,7 +227,7 @@ export default function Home() {
               Clear Database
             </button>
           </div>
-
+          
           <table
             border={1}
             cellPadding={5}
@@ -270,7 +270,7 @@ export default function Home() {
             Total Records: {mockDatabase.length}
           </p>
         </fieldset>
-
+      
         <hr style={{ marginTop: "20px", border: "1px solid #000" }} />
         <p style={{ fontSize: "11px", textAlign: "center", marginBottom: 0 }}>
           Schema:{" "}
