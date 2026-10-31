@@ -125,7 +125,7 @@ export default function Home() {
           </button>
         </div>
 
-        {/* Registration Form */}
+        {/* form */}
         <fieldset
           style={{ border: "2px solid #000", marginBottom: "20px" }}
         >
@@ -172,7 +172,7 @@ export default function Home() {
           )}
         </fieldset>
 
-        {/* Registered Usernames Quick View */}
+        {/* usernames view */}
         <fieldset
           style={{ border: "2px solid #000", marginBottom: "20px" }}
         >
@@ -197,7 +197,7 @@ export default function Home() {
         {/* Database Table View */}
         <fieldset style={{ border: "2px solid #000" }}>
           <legend>
-            <strong>[ Turso Database View: `users` ]</strong>
+            <strong>[ Database View: `users` ]</strong>
           </legend>
 
           <div style={{ marginBottom: "10px", textAlign: "right" }}>
