@@ -1,7 +1,7 @@
 // app/RegistryClient.tsx
 "use client";
 
-import { useState, useOptimistic, FormEvent } from "react";
+import { useState, FormEvent } from "react";
 import { registerUser, clearDatabase } from "./actions/actions";
 
 import type { UserRecord } from "./page";
@@ -11,18 +11,7 @@ export default function RegistryClient({ initialUsers }: { initialUsers: UserRec
   const [username, setUsername] = useState<string>("");
   const [status, setStatus] = useState<{ message: string; isError: boolean } | null>(null);
 
-  const [optimisticUsers, setOptimisticUsers] = useOptimistic(
-    initialUsers,
-    (state, action: { type: "ADD" | "CLEAR"; payload?: UserRecord }) => {
-      if (action.type === "ADD" && action.payload) {
-        return [...state, action.payload];
-      }
-      if (action.type === "CLEAR") {
-        return [];
-      }
-      return state;
-    }
-  );
+  const [users, setUsers] = useState(initialUsers);
 
   const generateRandomIp = (): string => {
     const octet3 = Math.floor(Math.random() * 50) + 1;
@@ -47,17 +36,15 @@ export default function RegistryClient({ initialUsers }: { initialUsers: UserRec
       created_at: new Date().toISOString().replace("T", " ").substring(0, 19),
     };
 
-    // 1. Update UI instantly
-    setOptimisticUsers({ type: "ADD", payload: tempUser });
-    setUsername("");
-    setStatus({
-      message: `SUCCESS: User '${trimmedUser}' inserted into database.`,
-      isError: false,
-    });
-
-    // 2. Background database mutation
     const res = await registerUser(trimmedUser, currentIp);
-    if (!res.success) {
+    if (res.success) {
+      setUsers((currentUsers) => [...currentUsers, tempUser]);
+      setUsername("");
+      setStatus({
+        message: `SUCCESS: User '${trimmedUser}' inserted into database.`,
+        isError: false,
+      });
+    } else {
       setStatus({
         message: `ERROR: ${res.error}`,
         isError: true,
@@ -66,15 +53,14 @@ export default function RegistryClient({ initialUsers }: { initialUsers: UserRec
   };
 
   const handleClearDb = async () => {
-    // 1. Clear UI instantly
-    setOptimisticUsers({ type: "CLEAR" });
     setStatus(null);
 
-    // 2. Background database mutation
     const res = await clearDatabase();
-    if (!res.success) {
+    if (res.success) {
+      setUsers([]);
+    } else {
       setStatus({
-        message: `ERROR: Failed to clear database`,
+        message: `ERROR: ${res.error}`,
         isError: true,
       });
     }
@@ -185,12 +171,12 @@ export default function RegistryClient({ initialUsers }: { initialUsers: UserRec
             <strong>[ Registered Usernames ]</strong>
           </legend>
           <ul style={{ margin: "5px 0", paddingLeft: "20px" }}>
-            {optimisticUsers.length === 0 ? (
+            {users.length === 0 ? (
               <li>
                 <em>No users registered.</em>
               </li>
             ) : (
-              optimisticUsers.map((user) => (
+              users.map((user) => (
                 <li key={user.id}>
                   <strong>{user.username}</strong> ({user.ip_address})
                 </li>
@@ -230,7 +216,7 @@ export default function RegistryClient({ initialUsers }: { initialUsers: UserRec
               </tr>
             </thead>
             <tbody>
-              {optimisticUsers.map((user) => (
+              {users.map((user) => (
                 <tr key={user.id}>
                   <td>{user.id}</td>
                   <td>
@@ -243,14 +229,14 @@ export default function RegistryClient({ initialUsers }: { initialUsers: UserRec
             </tbody>
           </table>
 
-          {optimisticUsers.length === 0 && (
+          {users.length === 0 && (
             <p style={{ textAlign: "center", color: "#555" }}>
               No records found in database.
             </p>
           )}
 
           <p style={{ fontSize: "12px", marginBottom: 0 }}>
-            Total Records: {optimisticUsers.length}
+            Total Records: {users.length}
           </p>
         </fieldset>
 
