@@ -2,6 +2,8 @@
 import { getUsers } from "./actions/actions";
 import RegistryClient from "./RegistryClient";
 
+export const dynamic = "force-dynamic";
+
 export interface UserRecord {
   id: number;
   username: string;
