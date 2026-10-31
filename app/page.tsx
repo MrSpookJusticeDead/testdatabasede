@@ -94,7 +94,7 @@ export default function Home() {
           padding: "15px",
         }}
       >
-        {/* Header */}
+        
         <h1
           style={{
             marginTop: 0,
@@ -103,10 +103,10 @@ export default function Home() {
             paddingBottom: "10px",
           }}
         >
-          === USER REGISTRY DATABASE SYSTEM ===
+          === database test ===
         </h1>
 
-        {/* IP Status Bar */}
+        {/* bar */}
         <div
           style={{
             backgroundColor: "#eee",
@@ -133,7 +133,7 @@ export default function Home() {
             <strong>[ Add New User ]</strong>
           </legend>
           <p style={{ fontSize: "12px", marginTop: "2px" }}>
-            Note: Table constraint enforced - ONE username per IP address.
+          one username per IP address
           </p>
 
           <form onSubmit={handleSubmit}>
