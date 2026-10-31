@@ -185,7 +185,7 @@ export default function RegistryClient({ initialUsers }: { initialUsers: UserRec
           </ul>
         </fieldset>
 
-        {/* Database Table View */}
+        {/* Database View */}
         <fieldset style={{ border: "2px solid #000" }}>
           <legend>
             <strong>[ Database View: `users` ]</strong>
