@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect, FormEvent } from "react";
-
-const DB_KEY = "turso_users_demo";
+import { getUsers, registerUser, clearDatabase } from "./actions";
 
 interface UserRecord {
   id: number;
@@ -14,34 +13,26 @@ interface UserRecord {
 export default function Home() {
   const [currentIp, setCurrentIp] = useState<string>("192.168.1.101");
   const [username, setUsername] = useState<string>("");
-  const [mockDatabase, setMockDatabase] = useState<UserRecord[]>([]);
+  const [databaseUsers, setDatabaseUsers] = useState<UserRecord[]>([]);
   const [status, setStatus] = useState<{ message: string; isError: boolean } | null>(null);
-  const [isLoaded, setIsLoaded] = useState<boolean>(false);
 
-  // Load initial data from localStorage on mount
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(DB_KEY);
-      if (stored) {
-        setMockDatabase(JSON.parse(stored));
-      }
-    } catch (e) {
-      console.error("Failed to load from storage", e);
+  // Fetch real users from Turso on load
+  const fetchUsers = async () => {
+    const res = await getUsers();
+    if (res.success && res.rows) {
+      const formattedRows: UserRecord[] = res.rows.map((row: any) => ({
+        id: Number(row.id),
+        username: String(row.username),
+        ip_address: String(row.ip_address),
+        created_at: String(row.created_at || ""),
+      }));
+      setDatabaseUsers(formattedRows);
     }
-    setIsLoaded(true);
-  }, []);
-
-  // Sync database state changes to localStorage
-  useEffect(() => {
-    if (isLoaded) {
-      localStorage.setItem(DB_KEY, JSON.stringify(mockDatabase));
-    }
-  }, [mockDatabase, isLoaded]);
-
-  const getFormattedDate = (): string => {
-    const now = new Date();
-    return now.toISOString().replace("T", " ").substring(0, 19);
   };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
   const generateRandomIp = (): string => {
     const octet3 = Math.floor(Math.random() * 50) + 1;
@@ -54,46 +45,34 @@ export default function Home() {
     setStatus(null);
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const trimmedUser = username.trim();
     if (!trimmedUser) return;
 
-    const existingEntry = mockDatabase.find(
-      (entry) => entry.ip_address === currentIp
-    );
+    const res = await registerUser(trimmedUser, currentIp);
 
-    if (existingEntry) {
-      setStatus({
-        message: `ERROR: UNIQUE constraint failed (ip_address=${currentIp}). IP has already registered user '${existingEntry.username}'.`,
-        isError: true,
-      });
-    } else {
-      const nextId =
-        mockDatabase.length > 0
-          ? Math.max(...mockDatabase.map((u) => u.id)) + 1
-          : 1;
-
-      const newUser: UserRecord = {
-        id: nextId,
-        username: trimmedUser,
-        ip_address: currentIp,
-        created_at: getFormattedDate(),
-      };
-
-      setMockDatabase((prev) => [...prev, newUser]);
+    if (res.success) {
       setStatus({
         message: `SUCCESS: User '${trimmedUser}' inserted into database.`,
         isError: false,
       });
       setUsername("");
+      await fetchUsers(); // Refresh table from Turso
+    } else {
+      setStatus({
+        message: `ERROR: ${res.error}`,
+        isError: true,
+      });
     }
   };
 
-  const handleClearDb = () => {
-    setMockDatabase([]);
-    localStorage.removeItem(DB_KEY);
-    setStatus(null);
+  const handleClearDb = async () => {
+    const res = await clearDatabase();
+    if (res.success) {
+      setDatabaseUsers([]);
+      setStatus(null);
+    }
   };
 
   return (
@@ -202,12 +181,12 @@ export default function Home() {
             <strong>[ Registered Usernames ]</strong>
           </legend>
           <ul style={{ margin: "5px 0", paddingLeft: "20px" }}>
-            {mockDatabase.length === 0 ? (
+            {databaseUsers.length === 0 ? (
               <li>
                 <em>No users registered.</em>
               </li>
             ) : (
-              mockDatabase.map((user) => (
+              databaseUsers.map((user) => (
                 <li key={user.id}>
                   <strong>{user.username}</strong> ({user.ip_address})
                 </li>
@@ -227,7 +206,7 @@ export default function Home() {
               Clear Database
             </button>
           </div>
-          
+
           <table
             border={1}
             cellPadding={5}
@@ -247,7 +226,7 @@ export default function Home() {
               </tr>
             </thead>
             <tbody>
-              {mockDatabase.map((user) => (
+              {databaseUsers.map((user) => (
                 <tr key={user.id}>
                   <td>{user.id}</td>
                   <td>
@@ -260,17 +239,17 @@ export default function Home() {
             </tbody>
           </table>
 
-          {mockDatabase.length === 0 && (
+          {databaseUsers.length === 0 && (
             <p style={{ textAlign: "center", color: "#555" }}>
               No records found in database.
             </p>
           )}
 
           <p style={{ fontSize: "12px", marginBottom: 0 }}>
-            Total Records: {mockDatabase.length}
+            Total Records: {databaseUsers.length}
           </p>
         </fieldset>
-      
+
         <hr style={{ marginTop: "20px", border: "1px solid #000" }} />
         <p style={{ fontSize: "11px", textAlign: "center", marginBottom: 0 }}>
           Schema:{" "}
