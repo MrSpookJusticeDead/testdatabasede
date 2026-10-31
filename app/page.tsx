@@ -16,7 +16,6 @@ export default function Home() {
   const [databaseUsers, setDatabaseUsers] = useState<UserRecord[]>([]);
   const [status, setStatus] = useState<{ message: string; isError: boolean } | null>(null);
 
-  // Fetch real users from Turso on load
   const fetchUsers = async () => {
     const res = await getUsers();
     if (res.success && res.rows) {
@@ -58,7 +57,7 @@ export default function Home() {
         isError: false,
       });
       setUsername("");
-      await fetchUsers(); // Refresh table from Turso
+      await fetchUsers();
     } else {
       setStatus({
         message: `ERROR: ${res.error}`,
