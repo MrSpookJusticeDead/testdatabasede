@@ -4,7 +4,7 @@ import { createClient } from "@libsql/client/web";
 import { cache } from "react";
 import { headers } from "next/headers";
 
-import { auth } from "@/lib/auth";
+import { auth } from "@lib/auth;
 
 const db = createClient({
   url: process.env.TURSO_DATABASE_URL!,
