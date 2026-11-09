@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 import { MessageRecord } from "./page";
 
 export default function GlobalChatClient({ initialMessages }: { initialMessages: MessageRecord[] }) {
-  // Call useSession as a method on authClient
   const { data: session, isPending: sessionLoading } = authClient.useSession();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
