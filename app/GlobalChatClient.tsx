@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { signIn, signUp, useSession, signOut } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth-client";
 import { postMessage } from "./actions/actions";
 import { useRouter } from "next/navigation";
 import { MessageRecord } from "./page";
 
 export default function GlobalChatClient({ initialMessages }: { initialMessages: MessageRecord[] }) {
-  const { data: session, isPending: sessionLoading } = useSession();
+  // Call useSession as a method on authClient
+  const { data: session, isPending: sessionLoading } = authClient.useSession();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -25,13 +26,13 @@ export default function GlobalChatClient({ initialMessages }: { initialMessages:
     setAuthError("");
     try {
       if (isSignUp) {
-        const res = await signUp.email({ email, password, name });
+        const res = await authClient.signUp.email({ email, password, name });
         if (res.error) {
           setAuthError(res.error.message || "Registration failed");
           return;
         }
       } else {
-        const res = await signIn.email({ email, password });
+        const res = await authClient.signIn.email({ email, password });
         if (res.error) {
           setAuthError(res.error.message || "Login failed");
           return;
@@ -77,7 +78,7 @@ export default function GlobalChatClient({ initialMessages }: { initialMessages:
               <p className="text-xs text-zinc-400">{session.user.email}</p>
             </div>
             <button
-              onClick={() => signOut().then(() => router.refresh())}
+              onClick={() => authClient.signOut().then(() => router.refresh())}
               className="px-3 py-1.5 text-xs font-medium bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-700 rounded-lg transition"
             >
               Sign Out
