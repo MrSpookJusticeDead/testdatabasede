@@ -1,27 +1,28 @@
-// app/page.tsx
-import { getUsers } from "./actions/actions";
-import RegistryClient from "./RegistryClient";
+import { getMessages } from "./actions/actions";
+import GlobalChatClient from "./GlobalChatClient";
 
 export const dynamic = "force-dynamic";
 
-export interface UserRecord {
+export interface MessageRecord {
   id: number;
+  user_id: string;
   username: string;
-  ip_address: string;
+  content: string;
   created_at: string;
 }
 
 export default async function Page() {
-  const res = await getUsers();
+  const res = await getMessages();
   
-  const initialUsers: UserRecord[] = res.success && res.rows 
+  const initialMessages: MessageRecord[] = res.success && res.rows 
     ? res.rows.map((row: any) => ({
         id: Number(row.id),
+        user_id: String(row.user_id),
         username: String(row.username),
-        ip_address: String(row.ip_address),
+        content: String(row.content),
         created_at: String(row.created_at || ""),
-      }))
+      })).reverse() // Oldest to newest
     : [];
 
-  return <RegistryClient initialUsers={initialUsers} />;
+  return <GlobalChatClient initialMessages={initialMessages} />;
 }
