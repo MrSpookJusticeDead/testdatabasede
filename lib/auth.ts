@@ -7,6 +7,9 @@ const client = createClient({
   authToken: process.env.TURSO_AUTH_TOKEN,
 });
 
+console.log("DB URL:", process.env.TURSO_DATABASE_URL);
+console.log("Auth URL:", process.env.BETTER_AUTH_URL);
+
 export const auth = betterAuth({
   database: {
     dialect: new LibsqlDialect({
