@@ -13,8 +13,10 @@
     "@libsql/client": "^0.18.0",
     "@libsql/kysely-libsql": "^0.4.1",
     "better-auth": "^1.7.18",
+    "googleapis": "^189.0.0",
     "kysely": "^0.29.8",
     "next": "16.2.4",
+    "nodemailer": "^10.4.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "resend": "^6.37.0"
