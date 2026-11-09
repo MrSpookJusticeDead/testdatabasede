@@ -16,6 +16,7 @@ export default function GlobalChatClient({ initialMessages }: { initialMessages:
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [authError, setAuthError] = useState("");
+  const [verificationSent, setVerificationSent] = useState(false);
 
   const [messageText, setMessageText] = useState("");
   const [chatError, setChatError] = useState("");
@@ -23,23 +24,44 @@ export default function GlobalChatClient({ initialMessages }: { initialMessages:
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError("");
+    setVerificationSent(false);
+    
     try {
       if (isSignUp) {
-        const res = await authClient.signUp.email({ email, password, name });
+        const res = await authClient.signUp.email({ 
+          email, 
+          password, 
+          name,
+          callbackURL: "/verified" // Optional: redirect after verification
+        });
         if (res.error) {
           setAuthError(res.error.message || "Registration failed");
           return;
         }
+        setVerificationSent(true);
       } else {
-        const res = await authClient.signIn.email({ email, password });
+        const res = await authClient.signIn.email({ 
+          email, 
+          password,
+          callbackURL: "/"
+        });
         if (res.error) {
           setAuthError(res.error.message || "Login failed");
           return;
         }
+        router.refresh();
       }
-      router.refresh();
     } catch (err: any) {
       setAuthError(err.message || "An error occurred");
+    }
+  };
+
+  const handleResendVerification = async () => {
+    const res = await authClient.sendVerificationEmail({ email });
+    if (res.error) {
+      setAuthError(res.error.message || "Failed to resend email");
+    } else {
+      setAuthError("Verification email resent! Check your inbox.");
     }
   };
 
@@ -58,6 +80,45 @@ export default function GlobalChatClient({ initialMessages }: { initialMessages:
       }
     });
   };
+
+  // Show verification message after signup
+  if (verificationSent) {
+    return (
+      <main className="flex-1 flex flex-col max-w-4xl w-full mx-auto p-4 md:p-6">
+        <div className="flex-1 flex items-center justify-center">
+          <div className="w-full max-w-md bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 shadow-xl backdrop-blur text-center">
+            <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d=" " />
+              </svg>
+            </div>
+            <h2 className="text-xl font-bold text-white mb-2">Check your email!</h2>
+            <p className="text-zinc-400 mb-6">
+              We sent a verification link to <strong className="text-white">{email}</strong>
+            </p>
+            <p className="text-sm text-zinc-500 mb-4">
+              Click the link in the email to verify your account, then sign in.
+            </p>
+            <button
+              onClick={handleResendVerification}
+              className="text-sm text-emerald-500 hover:text-emerald-400"
+            >
+              Resend verification email
+            </button>
+            <button
+              onClick={() => {
+                setVerificationSent(false);
+                setIsSignUp(false);
+              }}
+              className="block w-full mt-4 text-sm text-zinc-400 hover:text-white"
+            >
+              Back to sign in
+            </button>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="flex-1 flex flex-col max-w-4xl w-full mx-auto p-4 md:p-6">
