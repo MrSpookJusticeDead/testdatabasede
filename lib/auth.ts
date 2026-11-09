@@ -19,21 +19,27 @@ export const auth = betterAuth({
   },
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: true, // Users must verify email before signing in
+    requireEmailVerification: true,
   },
   emailVerification: {
     async sendVerificationEmail({ user, url, token }, request) {
-      await resend.emails.send({
-        from: "Insanitybot <onboarding@insanity.com>", // Update with your domain
-        to: user.email,
-        subject: "Verify your email address",
-        html: `
-          <h1>Welcome!</h1>
-          <p>Click the link below to verify your email:</p>
-          <a href="${url}">Verify Email</a>
-          <p>Or copy this link: ${url}</p>
-        `,
-      });
+      try {
+        const data = await resend.emails.send({
+          from: "Insanity <onboarding@resend.dev>", // Resend's sandbox
+          to: user.email,
+          subject: "Verify your email - Insanity",
+          html: `
+            <h1>Welcome!</h1>
+            <p>Click the link below to verify your email:</p>
+            <a href="${url}" style="display: inline-block; padding: 12px 24px; background-color: #10b981; color: white; text-decoration: none; border-radius: 8px; margin: 20px 0;">Verify Email</a>
+            <p>Or copy this link: <a href="${url}">${url}</a></p>
+          `,
+        });
+        console.log("Email sent successfully:", data);
+      } catch (error) {
+        console.error("❌ Failed to send email:", error);
+        console.log(" Verification URL for", user.email, ":", url);
+      }
     },
   },
   baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
