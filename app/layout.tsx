@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Global Pulse - Global Social Chat",
-  description: "Simple global chat powered by Next.js, Turso, and Better Auth.",
+  title: "social chat test",
+  description: "test",
 };
 
 export default function RootLayout({

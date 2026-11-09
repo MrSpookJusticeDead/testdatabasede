@@ -65,7 +65,7 @@ export default function GlobalChatClient({ initialMessages }: { initialMessages:
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
             <span className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
-            Global Pulse
+            social chat test
           </h1>
           <p className="text-sm text-zinc-400">Global chat room for registered users</p>
         </div>
